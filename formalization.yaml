@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "The Moser–Tardos theorem (algorithmic Lovász Local Lemma)"
+  description: >-
+    A Lean 4 / Mathlib formalization of the Moser–Tardos theorem in the variable setting: finitely
+    many independent random variables with finite ranges, n events each determined by a finite
+    set of variables, neighbours sharing a variable. If P(A_j) ≤ x_j ∏_{k ∈ Γ(j)} (1 − x_k) with
+    0 ≤ x_j < 1, the resampling algorithm (always resampling the first violated event), run on a
+    random resampling table, resamples A_j at most x_j / (1 − x_j) times in expectation among its
+    first t steps, for every t; the expected total number of resamplings is at most
+    ∑_j x_j / (1 − x_j); the probability that it has not stopped after t steps is at most
+    (∑_j x_j / (1 − x_j)) / t; and some assignment avoids all events (the Lovász Local Lemma in the
+    variable setting). The proof formalizes witness trees built from the log, the τ-check coupling
+    with the resampling table, and the Galton–Watson bound.
+  authors:
+    - "Juan Pablo Traverso Gianini"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Juan Pablo Traverso Gianini"
+
+classification:
+  arxiv: ["math.CO", "math.PR", "cs.DS"]
+  msc2020: ["05D40", "60C05", "68W20"]
+
+sources:
+  - title: "A constructive proof of the general Lovász Local Lemma"
+    authors:
+      - "Robin A. Moser"
+      - "Gábor Tardos"
+    id: "doi:10.1145/1667053.1667060"
+    type: "paper"
+    location: "Journal of the ACM 57 (2010), no. 2, Article 11"
+    relationship: "formalizes"
+    note: >-
+      Theorem 1.2 (expected number of resamplings of each event) for the sequential algorithm, with
+      the deterministic choice of the first violated event (the paper allows any choice); witness
+      trees, the τ-check and the Galton–Watson bound follow Sections 2–3. The algorithm is run on
+      a resampling table, as in the paper's analysis; the statements quantify over the first t
+      steps with a random table of depth t.
+    license: "all rights reserved"
+    author_endorsement: "n/a"
+
+related_formalizations:
+  - id: "PALOMAR-2026-10-17-000004 (jtraverso/pseudorandom-hypergraph-matchings @ 3957f3c)"
+    relationship: "builds-on"
+    note: >-
+      The same author's formalization of Ehard–Glock–Joos. Its finite product spaces
+      (`PseudorandomLib/FiniteProb.lean`) are included byte-identically and are exactly the
+      variable setting; the Challenge copies their definitions verbatim.
+  - id: "PALOMAR-2026-10-20-000004 (jtraverso/lovasz-local-lemma @ 9d020fa)"
+    relationship: "independent"
+    note: >-
+      The same author's formalization of the (non-constructive) Lovász Local Lemma with a
+      dependency graph. The existence statement here (`exists_avoiding`) is the variable-setting
+      case, proved independently through the algorithm.
+
+status:
+  scope: >-
+    Proved for finite variable index and value types, every finite family of events determined by
+    their variable sets, every x with 0 ≤ x_j < 1 satisfying the condition, and every number t of
+    steps. The algorithm resamples the first violated event in the order of Fin n; parallel
+    versions and running-time bounds in terms of n are not formalized.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["Claude Opus 5.5"]
+      framework: "Claude Code (Anthropic)"
+      tool_setup: >-
+        Wrote the statements, the definitions and the proofs (witness trees, the τ-check coupling,
+        independence in finite product spaces, the Galton–Watson bound), the sanity checks and the
+        Challenge/Solution pair, checked with a local build, a comparison of the elaborated
+        Challenge and Solution declarations (pp.all) and #print axioms (Lean v4.35.0-rc3, Mathlib
+        c55e6e786f49471c72fbddbec5415808896aec1e).
+      cost:
+        wall_time: "about one day"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: "Natural-language instructions in Spanish, directed by the author."
+  spend_usd: "not tracked"
+  notes: >-
+    The result was chosen by the human author; the Lean proofs are AI-generated and mechanically
+    verified (no sorry, axioms limited to propext, Classical.choice and Quot.sound).
+
+fidelity:
+  divergences: >-
+    Probability spaces are finite products given by probability mass functions (P i a), with
+    expectations and probabilities as explicit finite sums. Event j is a predicate on assignments
+    ι → α determined by the variables in vbl j (hypothesis hdep); neighbours are the other events
+    whose variable sets meet vbl j. The algorithm always resamples the first violated event in
+    the order of Fin n, and is run on a resampling table: variable i takes the table entries
+    T i 0, T i 1, … in turn. A random table of depth t has independent entries, entry (i, l) with
+    law P i; entries beyond depth t are read as a fixed a₀, which the first t steps never use.
+    The bounds concern the first t steps, for every t; letting t → ∞ gives the statements for the
+    whole run.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (AI agent in Claude Code, acting for the author)"
+  notes: >-
+    Agent review by Claude Opus 5.5, distinct from the mechanical verification: the statements
+    were compared with Moser–Tardos (2010) and checked on small cases (MoserTardos/Sanity.lean: a
+    fair coin with one event satisfies the condition with x = 1/2, giving at most one expected
+    resampling and an avoiding assignment; an event that always holds cannot satisfy the
+    condition). No independent human mathematical review has been performed. The result is
+    classical; no mathematical novelty is claimed.
+
+alignment:
+  namespace: "MoserTardosTheorem"
+  statements:
+    - source: "Moser–Tardos (2010), Theorem 1.2: E[resamplings of A_j] ≤ x_j / (1 − x_j)"
+      lean: "MoserTardosTheorem.expected_count_le"
+      module: "Challenge"
+      status: "proved"
+    - source: "Moser–Tardos (2010), Theorem 1.2: expected total ≤ ∑_j x_j / (1 − x_j)"
+      lean: "MoserTardosTheorem.expected_totalCount_le"
+      module: "Challenge"
+      status: "proved"
+    - source: "Termination: P(not stopped after t steps) ≤ (∑_j x_j / (1 − x_j)) / t"
+      lean: "MoserTardosTheorem.pProb_running_le"
+      module: "Challenge"
+      status: "proved"
+    - source: "The Lovász Local Lemma in the variable setting"
+      lean: "MoserTardosTheorem.exists_avoiding"
+      module: "Challenge"
+      status: "proved"
+
+acknowledgements: >-
+  Mathlib and the Lean community.
